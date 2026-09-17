@@ -1,0 +1,28 @@
+name: pi5
+status: stub
+kernel: own
+provides: []
+planned_provides:
+  - isolated_network_identity
+  - processes_gone
+  - peers_see_silence
+  - disk_preserved
+  - private_ipc_namespace
+  - private_dev_shm
+  - peers_see_no_progress
+  - unfsynced_loss
+  - own_kernel
+  - watchdog
+  - independent_realtime_clock
+  - arm64_native
+  - hw_timing
+  - physical_nvme
+  - artifact_delivery_path
+planned_actions:
+  node.off: {target_state: available}
+  node.on: {target_state: unavailable}
+  process.pause: {target_state: available}
+  process.resume: {target_state: any}
+constraints:
+  power: relay_or_manual
+  partition: managed_switch

@@ -1,0 +1,21 @@
+# Vocabulary of semantics a backend may provide, a relaxation may break,
+# and a check may require.  Names outside this list are rejected at load
+# time: a typo must not silently turn a check into NOT_MEANINGFUL or a
+# backend into something it is not.
+semantics:
+  - isolated_network_identity   # own IP, same service port on every node
+  - processes_gone              # node.off leaves no process of the node alive
+  - peers_see_silence           # node.off: peers get no FIN/RST, only timeouts
+  - disk_preserved              # node.off keeps node storage for node.on
+  - private_ipc_namespace       # node.off takes the node's SysV segments with it
+  - private_dev_shm             # node.off takes the node's POSIX shm with it
+  - peers_see_no_progress       # a paused node answers at the network level
+                                # while its service makes no progress
+  - unfsynced_loss              # node.off loses writes not covered by fsync
+  - own_kernel
+  - watchdog
+  - independent_realtime_clock
+  - arm64_native
+  - hw_timing
+  - physical_nvme
+  - artifact_delivery_path      # artifacts reach the node via fetch + checksum

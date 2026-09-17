@@ -1,0 +1,4 @@
+name: standby_prefix_consistent
+requires: [processes_gone, isolated_network_identity]
+observes: [processes_gone]
+impl: checks.standby_prefix_consistent:evaluate

@@ -1,0 +1,4 @@
+name: postgres_recovers
+requires: [disk_preserved, processes_gone]
+observes: [processes_gone]
+impl: checks.postgres_recovers:evaluate

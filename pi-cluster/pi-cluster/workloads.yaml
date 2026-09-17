@@ -1,0 +1,8 @@
+# Workload types.  `service` says which service type the workload can drive.
+workloads:
+  synthetic:
+    service: fake
+    impl: controller.workload:SyntheticWorkload
+  sql:
+    service: postgres
+    impl: controller.workload_sql:SqlWorkload

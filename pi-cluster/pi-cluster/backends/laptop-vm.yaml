@@ -1,0 +1,24 @@
+name: laptop-vm
+status: stub
+kernel: own
+provides: []
+planned_provides:
+  - isolated_network_identity
+  - processes_gone
+  - disk_preserved
+  - private_ipc_namespace
+  - private_dev_shm
+  - peers_see_no_progress
+  - artifact_delivery_path
+  - peers_see_silence
+  - unfsynced_loss
+  - own_kernel
+  - watchdog
+  - independent_realtime_clock
+planned_actions:
+  node.off: {target_state: available}
+  node.on: {target_state: unavailable}
+  process.pause: {target_state: available}
+  process.resume: {target_state: any}
+constraints:
+  disk_cache: none_or_writeback   # cache=unsafe breaks fsync semantics

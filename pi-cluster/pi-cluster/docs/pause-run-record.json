@@ -1,0 +1,1153 @@
+{
+  "experiment_id": "exp-20260912T140549Z-7234",
+  "started": "2026-09-12T14:05:49.556078+00:00",
+  "git_commit": {
+    "commit": "2aff1bccd0bfe0c46446a606151cff6f4b860d87",
+    "dirty": false
+  },
+  "scenario": {
+    "path": "scenarios/pg-primary-pause.yaml",
+    "sha256": "e447f663ce19f52b59c99f0b8837680f7fc431fa0bb4ccf4b46462a37515ee79",
+    "content": {
+      "name": "pg-primary-pause",
+      "nodes": {
+        "count": 3
+      },
+      "service": {
+        "type": "postgres",
+        "artifact": "postgres-16"
+      },
+      "workload": {
+        "type": "sql",
+        "duration": 40.0
+      },
+      "faults": [
+        {
+          "at": 10.0,
+          "action": "process.pause",
+          "target": {
+            "role": "primary"
+          }
+        },
+        {
+          "at": 22.0,
+          "action": "process.resume",
+          "target": {
+            "node_of": 1
+          }
+        }
+      ],
+      "checks": [
+        {
+          "name": "replication_streaming",
+          "mandatory": true
+        },
+        {
+          "name": "paused_node_is_not_dead",
+          "mandatory": true
+        },
+        {
+          "name": "replication_streaming_again",
+          "mandatory": true
+        }
+      ],
+      "fidelity": {}
+    }
+  },
+  "backend_placement": {
+    "default": "laptop-nsnode",
+    "nodes": {
+      "n1": "laptop-nsnode",
+      "n2": "laptop-nsnode",
+      "n3": "laptop-nsnode"
+    }
+  },
+  "backend_provides": [
+    "isolated_network_identity",
+    "processes_gone",
+    "peers_see_silence",
+    "artifact_delivery_path",
+    "disk_preserved",
+    "private_ipc_namespace",
+    "private_dev_shm",
+    "peers_see_no_progress"
+  ],
+  "effective_provides": [
+    "artifact_delivery_path",
+    "disk_preserved",
+    "isolated_network_identity",
+    "peers_see_no_progress",
+    "peers_see_silence",
+    "private_dev_shm",
+    "private_ipc_namespace",
+    "processes_gone"
+  ],
+  "allowed_relaxations": [],
+  "effective_relaxations": [],
+  "instruments": [],
+  "hw_overlay": {
+    "path": "configs/hw/laptop-nsnode.yaml",
+    "content": {
+      "network": {
+        "subnet": "10.3.14.0/24",
+        "bench_addr": "10.3.14.1",
+        "node_addr_base": 10,
+        "bridge": "pic-br0"
+      },
+      "controller": {
+        "port": 7070,
+        "artifact_port": 7071
+      },
+      "timing": {
+        "heartbeat_interval": "0.2s",
+        "unavailable_after": "1.0s",
+        "register_timeout": "10s",
+        "service_ready_timeout": "30s",
+        "service_deploy_timeout": "120s",
+        "workload_request_timeout": "0.5s",
+        "kill_settle_timeout": "2s",
+        "node_return_timeout": "30s"
+      },
+      "storage": {
+        "node_root": "/var/tmp/picluster/nodes",
+        "dev_shm_size": "256m"
+      }
+    }
+  },
+  "artifacts": {
+    "postgres-16": {
+      "name": "postgres-16",
+      "type": "tree",
+      "service_type": "postgres",
+      "entrypoint": "pg/bin",
+      "sha256": "d3c7d3bec6413c07ddd588324872701cd3b753b10501fdc99433e6ebbb33f676",
+      "file": "postgres-16.tar.gz",
+      "recipe_commit": "2aff1bccd0bfe0c46446a606151cff6f4b860d87",
+      "build": "tools/build_postgres.sh",
+      "build_script_sha256": "f1ebf119f05216b7ffe76611295189ac872fc1baac8e1b87fc4a84ea2e7a4545"
+    }
+  },
+  "inventory": [
+    "n1",
+    "n2",
+    "n3"
+  ],
+  "service": {
+    "type": "postgres",
+    "params": {
+      "run_as": "postgres",
+      "superuser": "pic",
+      "database": "pic",
+      "guc": {
+        "listen_addresses": "'*'",
+        "wal_level": "replica",
+        "max_wal_senders": "10",
+        "hot_standby": "on",
+        "synchronous_commit": "on",
+        "log_line_prefix": "'%m [%p] '"
+      }
+    },
+    "roles": {
+      "n1": "primary",
+      "n2": "replica",
+      "n3": "replica"
+    },
+    "effective": {
+      "n1": {
+        "effective_config": "hot_standby = on\nlisten_addresses = '*'\nlog_line_prefix = '%m [%p] '\nmax_wal_senders = 10\nport = 5432\nsynchronous_commit = on\nunix_socket_directories = '/var/tmp/picluster/nodes/n1/disk/run'\nwal_level = replica\n",
+        "pgdata": "/var/tmp/picluster/nodes/n1/disk/pgdata",
+        "reused_pgdata": false,
+        "version": "postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      "n2": {
+        "effective_config": "hot_standby = on\nlisten_addresses = '*'\nlog_line_prefix = '%m [%p] '\nmax_wal_senders = 10\nport = 5432\nsynchronous_commit = on\nunix_socket_directories = '/var/tmp/picluster/nodes/n2/disk/run'\nwal_level = replica\n# standby of 10.3.14.11\n",
+        "pgdata": "/var/tmp/picluster/nodes/n2/disk/pgdata",
+        "reused_pgdata": false,
+        "version": "postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      "n3": {
+        "effective_config": "hot_standby = on\nlisten_addresses = '*'\nlog_line_prefix = '%m [%p] '\nmax_wal_senders = 10\nport = 5432\nsynchronous_commit = on\nunix_socket_directories = '/var/tmp/picluster/nodes/n3/disk/run'\nwal_level = replica\n# standby of 10.3.14.11\n",
+        "pgdata": "/var/tmp/picluster/nodes/n3/disk/pgdata",
+        "reused_pgdata": false,
+        "version": "postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      }
+    }
+  },
+  "workload": {
+    "acked": 46522,
+    "hung": false,
+    "resyncs": []
+  },
+  "probes": {
+    "before_fault": {
+      "n1": {
+        "role": "primary",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:51.656037+00",
+        "last_checkpoint": "0/3000060",
+        "reused_pgdata": false,
+        "replication": [
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/42F2A60"
+          },
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/42F2A60"
+          }
+        ],
+        "log": {
+          "max_id": 16522,
+          "count": 16522
+        }
+      },
+      "n2": {
+        "role": "replica",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:53.851045+00",
+        "last_checkpoint": "0/2000060",
+        "reused_pgdata": false,
+        "last_replay_lsn": "0/42F6068",
+        "log": {
+          "max_id": 16597,
+          "count": 16597
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:56.089661+00",
+        "last_checkpoint": "0/3000060",
+        "reused_pgdata": false,
+        "last_replay_lsn": "0/42F8DE0",
+        "log": {
+          "max_id": 16661,
+          "count": 16661
+        }
+      }
+    },
+    "end": {
+      "n1": {
+        "role": "primary",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:51.656037+00",
+        "last_checkpoint": "0/3000060",
+        "reused_pgdata": false,
+        "replication": [
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/480F4F0"
+          },
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/480F4F0"
+          }
+        ],
+        "log": {
+          "max_id": 46522,
+          "count": 46522
+        }
+      },
+      "n2": {
+        "role": "replica",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:53.851045+00",
+        "last_checkpoint": "0/2000060",
+        "reused_pgdata": false,
+        "last_replay_lsn": "0/480F4F0",
+        "log": {
+          "max_id": 46522,
+          "count": 46522
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684649765029584458",
+        "postmaster_start": "2026-09-12 14:05:56.089661+00",
+        "last_checkpoint": "0/3000060",
+        "reused_pgdata": false,
+        "last_replay_lsn": "0/480F4F0",
+        "log": {
+          "max_id": 46522,
+          "count": 46522
+        }
+      }
+    }
+  },
+  "faults": [
+    {
+      "action": "process.pause",
+      "node": "n1",
+      "before": {
+        "n1": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 10,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": [
+                15907,
+                15952,
+                15954,
+                15955,
+                15957,
+                15958,
+                15959,
+                16004,
+                16065,
+                16079
+              ]
+            }
+          }
+        },
+        "n2": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                15918,
+                15996,
+                15998,
+                15999,
+                16000,
+                16003
+              ]
+            }
+          }
+        },
+        "n3": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                15929,
+                16054,
+                16057,
+                16058,
+                16059,
+                16064
+              ]
+            }
+          }
+        }
+      },
+      "after": {
+        "n1": {
+          "peers_see_no_progress": {
+            "holds": true,
+            "evidence": {
+              "pids": 10,
+              "frozen": true,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": [
+                15907,
+                15952,
+                15954,
+                15955,
+                15957,
+                15958,
+                15959,
+                16004,
+                16065,
+                16079
+              ]
+            }
+          }
+        },
+        "n2": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                15918,
+                15996,
+                15998,
+                15999,
+                16000,
+                16003
+              ]
+            }
+          }
+        },
+        "n3": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                15929,
+                16054,
+                16057,
+                16058,
+                16059,
+                16064
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "action": "process.resume",
+      "node": "n1",
+      "before": {
+        "n1": {
+          "peers_see_no_progress": {
+            "holds": true,
+            "evidence": {
+              "pids": 10,
+              "frozen": true,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": [
+                15907,
+                15952,
+                15954,
+                15955,
+                15957,
+                15958,
+                15959,
+                16004,
+                16065,
+                16079
+              ]
+            }
+          }
+        },
+        "n2": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                15918,
+                15996,
+                15998,
+                15999,
+                16000,
+                16003
+              ]
+            }
+          }
+        },
+        "n3": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                15929,
+                16054,
+                16057,
+                16058,
+                16059,
+                16064
+              ]
+            }
+          }
+        }
+      },
+      "after": {
+        "n1": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 10,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": [
+                15907,
+                15952,
+                15954,
+                15955,
+                15957,
+                15958,
+                15959,
+                16004,
+                16065,
+                16079,
+                16621
+              ]
+            }
+          }
+        },
+        "n2": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                15918,
+                15996,
+                15998,
+                15999,
+                16000,
+                16003
+              ]
+            }
+          }
+        },
+        "n3": {
+          "peers_see_no_progress": {
+            "holds": false,
+            "evidence": {
+              "pids": 6,
+              "frozen": false,
+              "answers_ping": true
+            }
+          },
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                15929,
+                16054,
+                16057,
+                16058,
+                16059,
+                16064
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "run_status": "completed",
+  "error": null,
+  "checks": [
+    {
+      "name": "replication_streaming",
+      "mandatory": true,
+      "requires": [
+        "isolated_network_identity"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "phase": "before_fault",
+        "expected_up": [
+          "n1",
+          "n2",
+          "n3"
+        ],
+        "reasons": [],
+        "missing_probe": [],
+        "failed_probe": [],
+        "primary": [
+          "n1"
+        ],
+        "replicas": [
+          "n2",
+          "n3"
+        ],
+        "streaming": [
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/42F2A60"
+          },
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/42F2A60"
+          }
+        ]
+      }
+    },
+    {
+      "name": "paused_node_is_not_dead",
+      "mandatory": true,
+      "requires": [
+        "peers_see_no_progress",
+        "processes_gone"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "faults": [
+          {
+            "node": "n1",
+            "before": {
+              "peers_see_no_progress": {
+                "holds": false,
+                "evidence": {
+                  "pids": 10,
+                  "frozen": false,
+                  "answers_ping": true
+                }
+              },
+              "processes_gone": {
+                "holds": false,
+                "evidence": {
+                  "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+                  "pids": [
+                    15907,
+                    15952,
+                    15954,
+                    15955,
+                    15957,
+                    15958,
+                    15959,
+                    16004,
+                    16065,
+                    16079
+                  ]
+                }
+              }
+            },
+            "after": {
+              "peers_see_no_progress": {
+                "holds": true,
+                "evidence": {
+                  "pids": 10,
+                  "frozen": true,
+                  "answers_ping": true
+                }
+              },
+              "processes_gone": {
+                "holds": false,
+                "evidence": {
+                  "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+                  "pids": [
+                    15907,
+                    15952,
+                    15954,
+                    15955,
+                    15957,
+                    15958,
+                    15959,
+                    16004,
+                    16065,
+                    16079
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "node": "n1",
+            "action": "process.resume",
+            "before": {
+              "peers_see_no_progress": {
+                "holds": true,
+                "evidence": {
+                  "pids": 10,
+                  "frozen": true,
+                  "answers_ping": true
+                }
+              },
+              "processes_gone": {
+                "holds": false,
+                "evidence": {
+                  "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+                  "pids": [
+                    15907,
+                    15952,
+                    15954,
+                    15955,
+                    15957,
+                    15958,
+                    15959,
+                    16004,
+                    16065,
+                    16079
+                  ]
+                }
+              }
+            },
+            "after": {
+              "peers_see_no_progress": {
+                "holds": false,
+                "evidence": {
+                  "pids": 10,
+                  "frozen": false,
+                  "answers_ping": true
+                }
+              },
+              "processes_gone": {
+                "holds": false,
+                "evidence": {
+                  "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+                  "pids": [
+                    15907,
+                    15952,
+                    15954,
+                    15955,
+                    15957,
+                    15958,
+                    15959,
+                    16004,
+                    16065,
+                    16079,
+                    16621
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "replication_streaming_again",
+      "mandatory": true,
+      "requires": [
+        "isolated_network_identity"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "phase": "end",
+        "expected_up": [
+          "n1",
+          "n2",
+          "n3"
+        ],
+        "reasons": [],
+        "missing_probe": [],
+        "failed_probe": [],
+        "primary": [
+          "n1"
+        ],
+        "replicas": [
+          "n2",
+          "n3"
+        ],
+        "streaming": [
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/480F4F0"
+          },
+          {
+            "peer": "walreceiver",
+            "state": "streaming",
+            "sent_lsn": "0/480F4F0"
+          }
+        ],
+        "down_at_end": []
+      }
+    }
+  ],
+  "verdict": "PASS",
+  "events": [
+    {
+      "t": 0.0048,
+      "event": "experiment_start",
+      "scenario": "pg-primary-pause",
+      "backend": "laptop-nsnode"
+    },
+    {
+      "t": 0.0159,
+      "event": "bench_ready",
+      "bridge": "pic-br0",
+      "bench_addr": "10.3.14.1"
+    },
+    {
+      "t": 0.0537,
+      "event": "bench_node_powered_on",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "boot": 1
+    },
+    {
+      "t": 0.1186,
+      "event": "bench_node_powered_on",
+      "node": "n2",
+      "addr": "10.3.14.12",
+      "boot": 1
+    },
+    {
+      "t": 0.1985,
+      "event": "bench_node_powered_on",
+      "node": "n3",
+      "addr": "10.3.14.13",
+      "boot": 1
+    },
+    {
+      "t": 0.2177,
+      "event": "node_registered",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 0.2819,
+      "event": "node_registered",
+      "node": "n2",
+      "addr": "10.3.14.12",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 0.3065,
+      "event": "node_registered",
+      "node": "n3",
+      "addr": "10.3.14.13",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 1.413,
+      "event": "artifact_fetched",
+      "node": "n1",
+      "sha256": "d3c7d3bec6413c07ddd588324872701cd3b753b10501fdc99433e6ebbb33f676",
+      "cached": false
+    },
+    {
+      "t": 2.0705,
+      "event": "service_deployed",
+      "node": "n1",
+      "role": "primary",
+      "reused_state": false
+    },
+    {
+      "t": 2.4203,
+      "event": "service_started",
+      "node": "n1",
+      "role": "primary",
+      "port": 5432
+    },
+    {
+      "t": 3.5331,
+      "event": "artifact_fetched",
+      "node": "n2",
+      "sha256": "d3c7d3bec6413c07ddd588324872701cd3b753b10501fdc99433e6ebbb33f676",
+      "cached": false
+    },
+    {
+      "t": 4.2702,
+      "event": "service_deployed",
+      "node": "n2",
+      "role": "replica",
+      "reused_state": false
+    },
+    {
+      "t": 4.412,
+      "event": "service_started",
+      "node": "n2",
+      "role": "replica",
+      "port": 5432
+    },
+    {
+      "t": 5.7144,
+      "event": "artifact_fetched",
+      "node": "n3",
+      "sha256": "d3c7d3bec6413c07ddd588324872701cd3b753b10501fdc99433e6ebbb33f676",
+      "cached": false
+    },
+    {
+      "t": 6.49,
+      "event": "service_deployed",
+      "node": "n3",
+      "role": "replica",
+      "reused_state": false
+    },
+    {
+      "t": 6.7482,
+      "event": "service_started",
+      "node": "n3",
+      "role": "replica",
+      "port": 5432
+    },
+    {
+      "t": 6.7984,
+      "event": "services_ready",
+      "roles": {
+        "n1": "primary",
+        "n2": "replica",
+        "n3": "replica"
+      }
+    },
+    {
+      "t": 6.8547,
+      "event": "workload_started"
+    },
+    {
+      "t": 16.9529,
+      "event": "service_probed",
+      "node": "n1"
+    },
+    {
+      "t": 17.0582,
+      "event": "service_probed",
+      "node": "n2"
+    },
+    {
+      "t": 17.1367,
+      "event": "service_probed",
+      "node": "n3"
+    },
+    {
+      "t": 17.1368,
+      "event": "fault_resolved",
+      "action": "process.pause",
+      "selector": {
+        "role": "primary"
+      },
+      "node": "n1"
+    },
+    {
+      "t": 17.1449,
+      "event": "bench_primitive",
+      "prim": "freeze",
+      "node": "n1"
+    },
+    {
+      "t": 17.145,
+      "event": "fault_injected",
+      "action": "process.pause",
+      "node": "n1",
+      "details": {
+        "primitives": [
+          "freeze"
+        ],
+        "settled": true,
+        "expected_up": false
+      }
+    },
+    {
+      "t": 17.9639,
+      "event": "node_unavailable",
+      "node": "n1",
+      "observed_by": "heartbeat_timeout"
+    },
+    {
+      "t": 28.8506,
+      "event": "fault_resolved",
+      "action": "process.resume",
+      "selector": {
+        "node_of": 1
+      },
+      "node": "n1"
+    },
+    {
+      "t": 28.8583,
+      "event": "bench_primitive",
+      "prim": "thaw",
+      "node": "n1"
+    },
+    {
+      "t": 28.8584,
+      "event": "fault_injected",
+      "action": "process.resume",
+      "node": "n1",
+      "details": {
+        "primitives": [
+          "thaw"
+        ],
+        "settled": true,
+        "expected_up": true,
+        "service_lost": false
+      }
+    },
+    {
+      "t": 28.9149,
+      "event": "node_available",
+      "node": "n1",
+      "observed_by": "heartbeat"
+    },
+    {
+      "t": 28.922,
+      "event": "node_resumed",
+      "node": "n1",
+      "service": {
+        "state": "running",
+        "port": 5432,
+        "pid": 15952,
+        "role": "primary"
+      }
+    },
+    {
+      "t": 46.898,
+      "event": "service_probed",
+      "node": "n1"
+    },
+    {
+      "t": 46.954,
+      "event": "service_probed",
+      "node": "n2"
+    },
+    {
+      "t": 47.008,
+      "event": "service_probed",
+      "node": "n3"
+    },
+    {
+      "t": 47.0081,
+      "event": "workload_stopped",
+      "ok": 46522,
+      "per_second": [
+        1432,
+        1715,
+        1626,
+        1644,
+        1652,
+        1524,
+        1704,
+        1720,
+        1716,
+        1724,
+        208,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1725,
+        1680,
+        1783,
+        1450,
+        1590,
+        1679,
+        1705,
+        1664,
+        1435,
+        1751,
+        1667,
+        1667,
+        1658,
+        1717,
+        1750,
+        1643,
+        1629,
+        1664
+      ]
+    },
+    {
+      "t": 47.0087,
+      "event": "check_evaluated",
+      "name": "replication_streaming",
+      "result": "PASS"
+    },
+    {
+      "t": 47.0088,
+      "event": "check_evaluated",
+      "name": "paused_node_is_not_dead",
+      "result": "PASS"
+    },
+    {
+      "t": 47.009,
+      "event": "check_evaluated",
+      "name": "replication_streaming_again",
+      "result": "PASS"
+    },
+    {
+      "t": 47.009,
+      "event": "verdict",
+      "verdict": "PASS"
+    },
+    {
+      "t": 47.3714,
+      "event": "teardown_done"
+    }
+  ]
+}

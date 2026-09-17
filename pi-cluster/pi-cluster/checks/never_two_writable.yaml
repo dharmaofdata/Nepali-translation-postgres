@@ -1,0 +1,2 @@
+name: never_two_writable
+impl: checks.never_two_writable:evaluate

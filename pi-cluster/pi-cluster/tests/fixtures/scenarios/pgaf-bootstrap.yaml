@@ -1,0 +1,23 @@
+# Smallest pg_auto_failover scenario: bootstrap only, no faults yet.
+name: pgaf-bootstrap
+nodes:
+  count: 4
+services:
+  monitor:
+    type: pgaf
+    artifact: postgres-pgaf-16
+    placement: {nodes: [n4]}
+  db:
+    type: pgaf-postgres
+    artifact: postgres-pgaf-16
+    placement: {nodes: [n1, n2, n3]}
+    role_source: observed
+    initial: {primary: n1}
+    depends_on: [monitor]
+workload:
+  type: sql
+  duration: 12s
+faults: []
+checks:
+  - name: exactly_one_primary
+    mandatory: true

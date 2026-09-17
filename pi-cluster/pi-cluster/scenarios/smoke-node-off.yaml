@@ -1,0 +1,23 @@
+name: smoke-node-off
+
+nodes:
+  count: 3
+
+services:
+  app:
+    type: fake
+    artifact: fake-service
+    placement: {nodes: [n1, n2, n3]}
+
+workload:
+  type: synthetic
+  duration: 10s
+
+faults:
+  - at: 5s                     # relative to workload_started
+    action: node.off
+    target: {role: primary}
+
+checks:
+  - name: target_processes_gone
+    mandatory: true

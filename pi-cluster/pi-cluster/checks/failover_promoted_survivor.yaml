@@ -1,0 +1,4 @@
+name: failover_promoted_survivor
+requires: [processes_gone]
+observes: [processes_gone]
+impl: checks.failover_promoted_survivor:evaluate

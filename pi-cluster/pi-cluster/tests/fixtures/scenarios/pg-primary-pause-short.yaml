@@ -1,0 +1,30 @@
+name: pg-primary-pause-short
+
+nodes:
+  count: 3
+
+services:
+  db:
+    type: postgres
+    artifact: postgres-16
+    placement: {nodes: [n1, n2, n3]}
+
+workload:
+  type: sql
+  duration: 24s
+
+faults:
+  - at: 5s
+    action: process.pause
+    target: {role: primary}
+  - at: 12s
+    action: process.resume
+    target: {node_of: 1}
+
+checks:
+  - name: replication_streaming
+    mandatory: true
+  - name: paused_node_is_not_dead
+    mandatory: true
+  - name: replication_streaming_again
+    mandatory: true

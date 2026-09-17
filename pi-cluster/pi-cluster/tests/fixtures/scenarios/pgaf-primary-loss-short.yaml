@@ -1,0 +1,46 @@
+# First HA scenario: the primary is lost, something outside the executor
+# promotes a survivor, and the old primary comes back.  No network partition
+# and no fault on the monitor: one new decision maker at a time.
+name: pgaf-primary-loss-short
+
+nodes:
+  count: 4
+
+services:
+  monitor:
+    type: pgaf
+    artifact: postgres-pgaf-16
+    placement: {nodes: [n4]}
+
+  db:
+    type: pgaf-postgres
+    artifact: postgres-pgaf-16
+    placement: {nodes: [n1, n2, n3]}
+    role_source: observed        # the monitor decides; we only observe
+    initial: {primary: n1}       # bootstrap state, not a steady state
+    depends_on: [monitor]
+
+workload:
+  type: sql
+  duration: 110s
+
+faults:
+  - at: 15s
+    action: node.off
+    target: {role: primary}      # resolved from the observed role
+  - at: 55s
+    action: node.on
+    target: {node_of: 1}
+
+checks:
+  - name: never_two_writable
+    mandatory: true
+  - name: failover_promoted_survivor
+    mandatory: true
+  - name: old_primary_returns_as_replica
+    mandatory: true
+  - name: exactly_one_primary
+    mandatory: true
+  - name: acked_prefix_present
+    mandatory: false             # the returned node is rebuilt by the monitor,
+                                 # not recovered by us; kept for the numbers

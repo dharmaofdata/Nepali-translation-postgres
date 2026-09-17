@@ -1,0 +1,1779 @@
+{
+  "experiment_id": "exp-20260913T011451Z-ae61",
+  "started": "2026-09-13T01:14:51.060572+00:00",
+  "git_commit": {
+    "commit": "63f3f05c8daaba1d39625fc5983716b312e37fd7",
+    "dirty": false
+  },
+  "scenario": {
+    "path": "scenarios/pgaf-primary-loss.yaml",
+    "sha256": "312236babd25cbbb78d175f931373ef118ad5b8a51bbc182d501e7f2c4b1ad3a",
+    "content": {
+      "name": "pgaf-primary-loss",
+      "nodes": {
+        "count": 4
+      },
+      "services": {
+        "monitor": {
+          "type": "pgaf",
+          "artifact": "postgres-pgaf-16",
+          "placement": {
+            "nodes": [
+              "n4"
+            ]
+          },
+          "members": [
+            "n4"
+          ],
+          "role_source": "declared",
+          "initial": {
+            "primary": "n4"
+          },
+          "depends_on": [],
+          "workload_target": false
+        },
+        "db": {
+          "type": "pgaf-postgres",
+          "artifact": "postgres-pgaf-16",
+          "placement": {
+            "nodes": [
+              "n1",
+              "n2",
+              "n3"
+            ]
+          },
+          "role_source": "observed",
+          "initial": {
+            "primary": "n1"
+          },
+          "depends_on": [
+            "monitor"
+          ],
+          "members": [
+            "n1",
+            "n2",
+            "n3"
+          ],
+          "workload_target": true
+        }
+      },
+      "workload": {
+        "type": "sql",
+        "duration": 150.0,
+        "service": "db"
+      },
+      "faults": [
+        {
+          "at": 20.0,
+          "action": "node.off",
+          "target": {
+            "role": "primary"
+          }
+        },
+        {
+          "at": 70.0,
+          "action": "node.on",
+          "target": {
+            "node_of": 1
+          }
+        }
+      ],
+      "checks": [
+        {
+          "name": "never_two_writable",
+          "mandatory": true
+        },
+        {
+          "name": "failover_promoted_survivor",
+          "mandatory": true
+        },
+        {
+          "name": "old_primary_returns_as_replica",
+          "mandatory": true
+        },
+        {
+          "name": "exactly_one_primary",
+          "mandatory": true
+        },
+        {
+          "name": "acked_prefix_present",
+          "mandatory": false
+        }
+      ],
+      "fidelity": {}
+    }
+  },
+  "backend_placement": {
+    "default": "laptop-nsnode",
+    "nodes": {
+      "n1": "laptop-nsnode",
+      "n2": "laptop-nsnode",
+      "n3": "laptop-nsnode",
+      "n4": "laptop-nsnode"
+    }
+  },
+  "backend_provides": [
+    "isolated_network_identity",
+    "processes_gone",
+    "peers_see_silence",
+    "artifact_delivery_path",
+    "disk_preserved",
+    "private_ipc_namespace",
+    "private_dev_shm",
+    "peers_see_no_progress"
+  ],
+  "effective_provides": [
+    "artifact_delivery_path",
+    "disk_preserved",
+    "isolated_network_identity",
+    "peers_see_no_progress",
+    "peers_see_silence",
+    "private_dev_shm",
+    "private_ipc_namespace",
+    "processes_gone"
+  ],
+  "allowed_relaxations": [],
+  "effective_relaxations": [],
+  "instruments": [],
+  "hw_overlay": {
+    "path": "configs/hw/laptop-nsnode.yaml",
+    "content": {
+      "network": {
+        "subnet": "10.3.14.0/24",
+        "bench_addr": "10.3.14.1",
+        "node_addr_base": 10,
+        "bridge": "pic-br0"
+      },
+      "controller": {
+        "port": 7070,
+        "artifact_port": 7071
+      },
+      "timing": {
+        "heartbeat_interval": "0.2s",
+        "unavailable_after": "1.0s",
+        "register_timeout": "10s",
+        "service_ready_timeout": "30s",
+        "service_deploy_timeout": "120s",
+        "workload_request_timeout": "0.5s",
+        "kill_settle_timeout": "2s",
+        "node_return_timeout": "30s"
+      },
+      "storage": {
+        "node_root": "/var/tmp/picluster/nodes",
+        "dev_shm_size": "256m",
+        "tmp_size": "512m"
+      }
+    }
+  },
+  "artifacts": {
+    "postgres-pgaf-16": {
+      "name": "postgres-pgaf-16",
+      "type": "tree",
+      "service_types": [
+        "pgaf",
+        "pgaf-postgres"
+      ],
+      "entrypoint": ".",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "file": "postgres-pgaf-16.tar.gz",
+      "recipe_commit": "63f3f05c8daaba1d39625fc5983716b312e37fd7",
+      "build": "tools/build_postgres_pgaf.sh",
+      "build_script_sha256": "3d8d6c2ba2159578b4c576b1ca23d0c6a8a6f8422f1565d961b60d2f9d3bd0f3"
+    }
+  },
+  "inventory": [
+    "n1",
+    "n2",
+    "n3",
+    "n4"
+  ],
+  "services": {
+    "monitor": {
+      "type": "pgaf",
+      "members": [
+        "n4"
+      ],
+      "role_source": "declared",
+      "initial": {
+        "primary": "n4"
+      },
+      "params": {
+        "run_as": "postgres",
+        "superuser": "pic",
+        "database": "pic",
+        "monitor_user": "autoctl_node",
+        "monitor_database": "pg_auto_failover"
+      },
+      "effective": {
+        "n4": {
+          "reused_pgdata": false,
+          "uri": "postgres://autoctl_node@10.3.14.14:5432/pg_auto_failover?sslmode=prefer",
+          "version": "pg_autoctl version 2.1-2"
+        }
+      }
+    },
+    "db": {
+      "type": "pgaf-postgres",
+      "members": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "role_source": "observed",
+      "initial": {
+        "primary": "n1"
+      },
+      "params": {
+        "run_as": "postgres",
+        "superuser": "pic",
+        "database": "pic",
+        "monitor_service": "monitor",
+        "monitor_user": "autoctl_node",
+        "monitor_database": "pg_auto_failover",
+        "client_hba": "host all pic 0.0.0.0/0 trust"
+      },
+      "effective": {
+        "n1": {
+          "reused_pgdata": true,
+          "monitor": "postgres://autoctl_node@10.3.14.14:5432/pg_auto_failover?sslmode=prefer",
+          "client_hba": "host all pic 0.0.0.0/0 trust"
+        },
+        "n2": {
+          "reused_pgdata": false,
+          "monitor": "postgres://autoctl_node@10.3.14.14:5432/pg_auto_failover?sslmode=prefer",
+          "client_hba": "host all pic 0.0.0.0/0 trust"
+        },
+        "n3": {
+          "reused_pgdata": false,
+          "monitor": "postgres://autoctl_node@10.3.14.14:5432/pg_auto_failover?sslmode=prefer",
+          "client_hba": "host all pic 0.0.0.0/0 trust"
+        }
+      }
+    }
+  },
+  "workload": {
+    "acked": 90870,
+    "hung": false,
+    "resyncs": [
+      {
+        "client_acked": 20662,
+        "server_max": 20663
+      }
+    ]
+  },
+  "probes": {
+    "before_fault_1": {
+      "n1": {
+        "role": "primary",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "f",
+        "writable": true,
+        "replication": [
+          {
+            "peer": "pgautofailover_standby_2",
+            "state": "streaming"
+          },
+          {
+            "peer": "pgautofailover_standby_3",
+            "state": "streaming"
+          }
+        ],
+        "synchronous_standby_names": "ANY 1 (pgautofailover_standby_2, pgautofailover_standby_3)",
+        "log": {
+          "max_id": 20583,
+          "count": 20583
+        }
+      },
+      "n2": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A6E10",
+        "log": {
+          "max_id": 20615,
+          "count": 20615
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A88F8",
+        "log": {
+          "max_id": 20654,
+          "count": 20654
+        }
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "primary",
+            "goal": "primary"
+          },
+          {
+            "node": "n2",
+            "reported": "secondary",
+            "goal": "secondary"
+          },
+          {
+            "node": "n3",
+            "reported": "secondary",
+            "goal": "secondary"
+          }
+        ]
+      }
+    },
+    "before_fault": {
+      "n1": {
+        "role": "primary",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "f",
+        "writable": true,
+        "replication": [
+          {
+            "peer": "pgautofailover_standby_2",
+            "state": "streaming"
+          },
+          {
+            "peer": "pgautofailover_standby_3",
+            "state": "streaming"
+          }
+        ],
+        "synchronous_standby_names": "ANY 1 (pgautofailover_standby_2, pgautofailover_standby_3)",
+        "log": {
+          "max_id": 20583,
+          "count": 20583
+        }
+      },
+      "n2": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A6E10",
+        "log": {
+          "max_id": 20615,
+          "count": 20615
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A88F8",
+        "log": {
+          "max_id": 20654,
+          "count": 20654
+        }
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "primary",
+            "goal": "primary"
+          },
+          {
+            "node": "n2",
+            "reported": "secondary",
+            "goal": "secondary"
+          },
+          {
+            "node": "n3",
+            "reported": "secondary",
+            "goal": "secondary"
+          }
+        ]
+      }
+    },
+    "after_fault_1": {
+      "n1": {
+        "error": "TimeoutError: n1: no reply to service.probe in 10.0s"
+      },
+      "n2": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A93F8",
+        "log": {
+          "max_id": 20663,
+          "count": 20663
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/43A93F8",
+        "log": {
+          "max_id": 20663,
+          "count": 20663
+        }
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "primary",
+            "goal": "primary"
+          },
+          {
+            "node": "n2",
+            "reported": "secondary",
+            "goal": "secondary"
+          },
+          {
+            "node": "n3",
+            "reported": "secondary",
+            "goal": "secondary"
+          }
+        ]
+      }
+    },
+    "before_fault_2": {
+      "n2": {
+        "role": "primary",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "f",
+        "writable": false,
+        "replication": [],
+        "synchronous_standby_names": "",
+        "log": {
+          "max_id": 20663,
+          "count": 20663
+        }
+      },
+      "n3": {
+        "role": null,
+        "system_identifier": "7684822177303331801",
+        "error": "RuntimeError: psql: psql: error: connection to server on socket \"/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?"
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "primary",
+            "goal": "demote_timeout"
+          },
+          {
+            "node": "n2",
+            "reported": "stop_replication",
+            "goal": "stop_replication"
+          },
+          {
+            "node": "n3",
+            "reported": "join_secondary",
+            "goal": "join_secondary"
+          }
+        ]
+      }
+    },
+    "after_fault_2": {
+      "n2": {
+        "role": "primary",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "f",
+        "writable": false,
+        "replication": [],
+        "synchronous_standby_names": "",
+        "log": {
+          "max_id": 20663,
+          "count": 20663
+        }
+      },
+      "n3": {
+        "role": null,
+        "system_identifier": "7684822177303331801",
+        "error": "RuntimeError: psql: psql: error: connection to server on socket \"/run/postgresql/.s.PGSQL.5432\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?"
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "primary",
+            "goal": "demote_timeout"
+          },
+          {
+            "node": "n2",
+            "reported": "stop_replication",
+            "goal": "stop_replication"
+          },
+          {
+            "node": "n3",
+            "reported": "join_secondary",
+            "goal": "join_secondary"
+          }
+        ]
+      }
+    },
+    "end": {
+      "n1": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/6CA9070",
+        "log": {
+          "max_id": 90870,
+          "count": 90870
+        }
+      },
+      "n2": {
+        "role": "primary",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "f",
+        "writable": true,
+        "replication": [
+          {
+            "peer": "pgautofailover_standby_1",
+            "state": "streaming"
+          },
+          {
+            "peer": "pgautofailover_standby_3",
+            "state": "streaming"
+          }
+        ],
+        "synchronous_standby_names": "ANY 1 (pgautofailover_standby_1, pgautofailover_standby_3)",
+        "log": {
+          "max_id": 90870,
+          "count": 90870
+        }
+      },
+      "n3": {
+        "role": "replica",
+        "system_identifier": "7684822177303331801",
+        "in_recovery": "t",
+        "writable": false,
+        "last_replay_lsn": "0/6CA9070",
+        "log": {
+          "max_id": 90870,
+          "count": 90870
+        }
+      },
+      "n4": {
+        "role": "monitor",
+        "nodes": [
+          {
+            "node": "n1",
+            "reported": "secondary",
+            "goal": "secondary"
+          },
+          {
+            "node": "n2",
+            "reported": "primary",
+            "goal": "primary"
+          },
+          {
+            "node": "n3",
+            "reported": "secondary",
+            "goal": "secondary"
+          }
+        ]
+      }
+    }
+  },
+  "faults": [
+    {
+      "action": "node.off",
+      "node": "n1",
+      "before": {
+        "n1": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": [
+                29509,
+                29693,
+                29697,
+                29698,
+                29713,
+                29715,
+                29716,
+                29717,
+                29719,
+                29720,
+                29721,
+                29846,
+                30063,
+                30076
+              ]
+            }
+          }
+        },
+        "n2": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                29523,
+                29816,
+                29820,
+                29821,
+                29840,
+                29841,
+                29842,
+                29843,
+                29844,
+                29845
+              ]
+            }
+          }
+        },
+        "n3": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                29537,
+                30014,
+                30021,
+                30022,
+                30057,
+                30058,
+                30059,
+                30060,
+                30061,
+                30062
+              ]
+            }
+          }
+        },
+        "n4": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n4",
+              "pids": [
+                29553,
+                29609,
+                29613,
+                29614,
+                29623,
+                29624,
+                29625,
+                29626,
+                29628,
+                29629,
+                29630,
+                29631,
+                29632,
+                29633,
+                29635,
+                31037,
+                31079,
+                31084,
+                31100
+              ]
+            }
+          }
+        }
+      },
+      "after": {
+        "n1": {
+          "processes_gone": {
+            "holds": true,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": []
+            }
+          }
+        },
+        "n2": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                29523,
+                29816,
+                29820,
+                29821,
+                29840,
+                29841,
+                29842,
+                29843,
+                29844,
+                29845
+              ]
+            }
+          }
+        },
+        "n3": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                29537,
+                30014,
+                30021,
+                30022,
+                30057,
+                30058,
+                30059,
+                30060,
+                30061,
+                30062
+              ]
+            }
+          }
+        },
+        "n4": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n4",
+              "pids": [
+                29553,
+                29609,
+                29613,
+                29614,
+                29623,
+                29624,
+                29625,
+                29626,
+                29628,
+                29629,
+                29630,
+                29631,
+                29632,
+                29633,
+                29635,
+                31037,
+                31079,
+                31084
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "action": "node.on",
+      "node": "n1",
+      "before": {
+        "n1": {
+          "processes_gone": {
+            "holds": true,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": []
+            }
+          }
+        },
+        "n2": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                29523,
+                29816,
+                29820,
+                29821,
+                31929,
+                31932,
+                31934,
+                31935,
+                32004,
+                32005,
+                32006
+              ]
+            }
+          }
+        },
+        "n3": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                29537,
+                30014,
+                30021,
+                30022
+              ]
+            }
+          }
+        },
+        "n4": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n4",
+              "pids": [
+                29553,
+                29609,
+                29613,
+                29614,
+                29623,
+                29624,
+                29625,
+                29626,
+                29628,
+                29629,
+                29630,
+                29631,
+                29632,
+                29633,
+                29635,
+                31037,
+                32660,
+                32661
+              ]
+            }
+          }
+        }
+      },
+      "after": {
+        "n1": {
+          "processes_gone": {
+            "holds": true,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n1",
+              "pids": []
+            }
+          }
+        },
+        "n2": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n2",
+              "pids": [
+                29523,
+                29816,
+                29820,
+                29821,
+                31929,
+                31932,
+                31934,
+                31935,
+                32004,
+                32005,
+                32006
+              ]
+            }
+          }
+        },
+        "n3": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n3",
+              "pids": [
+                29537,
+                30014,
+                30021,
+                30022
+              ]
+            }
+          }
+        },
+        "n4": {
+          "processes_gone": {
+            "holds": false,
+            "evidence": {
+              "cgroup": "/sys/fs/cgroup/unified/picluster/n4",
+              "pids": [
+                29553,
+                29609,
+                29613,
+                29614,
+                29623,
+                29624,
+                29625,
+                29626,
+                29628,
+                29629,
+                29630,
+                29631,
+                29632,
+                29633,
+                29635,
+                31037,
+                32660,
+                32661
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "run_status": "completed",
+  "error": null,
+  "checks": [
+    {
+      "name": "never_two_writable",
+      "mandatory": true,
+      "requires": [],
+      "result": "PASS",
+      "evidence": {
+        "phases": {
+          "after_fault_1": {
+            "writable": [],
+            "roles": {
+              "n1": null,
+              "n2": "replica",
+              "n3": "replica"
+            }
+          },
+          "after_fault_2": {
+            "writable": [],
+            "roles": {
+              "n2": "primary",
+              "n3": null
+            }
+          },
+          "before_fault": {
+            "writable": [
+              "n1"
+            ],
+            "roles": {
+              "n1": "primary",
+              "n2": "replica",
+              "n3": "replica"
+            }
+          },
+          "before_fault_1": {
+            "writable": [
+              "n1"
+            ],
+            "roles": {
+              "n1": "primary",
+              "n2": "replica",
+              "n3": "replica"
+            }
+          },
+          "before_fault_2": {
+            "writable": [],
+            "roles": {
+              "n2": "primary",
+              "n3": null
+            }
+          },
+          "end": {
+            "writable": [
+              "n2"
+            ],
+            "roles": {
+              "n1": "replica",
+              "n2": "primary",
+              "n3": "replica"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "failover_promoted_survivor",
+      "mandatory": true,
+      "requires": [
+        "processes_gone"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "faults": [
+          {
+            "lost": "n1",
+            "was_writable": true,
+            "writable_at_end": [
+              "n2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "old_primary_returns_as_replica",
+      "mandatory": true,
+      "requires": [
+        "disk_preserved",
+        "processes_gone"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "nodes": {
+          "n1": {
+            "was_primary_before": true,
+            "end": {
+              "role": "replica",
+              "system_identifier": "7684822177303331801",
+              "in_recovery": "t",
+              "writable": false,
+              "last_replay_lsn": "0/6CA9070",
+              "log": {
+                "max_id": 90870,
+                "count": 90870
+              }
+            },
+            "monitor_says": {
+              "node": "n1",
+              "reported": "secondary",
+              "goal": "secondary"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "exactly_one_primary",
+      "mandatory": true,
+      "requires": [],
+      "result": "PASS",
+      "evidence": {
+        "expected_up": [
+          "n1",
+          "n2",
+          "n3"
+        ],
+        "writable": [
+          "n2"
+        ],
+        "unreachable": [],
+        "roles": {
+          "n1": "replica",
+          "n2": "primary",
+          "n3": "replica"
+        }
+      }
+    },
+    {
+      "name": "acked_prefix_present",
+      "mandatory": false,
+      "requires": [
+        "disk_preserved",
+        "processes_gone"
+      ],
+      "result": "PASS",
+      "evidence": {
+        "acked": 90870,
+        "nodes": {
+          "n1": {
+            "max_id": 90870,
+            "count": 90870
+          }
+        },
+        "crashed": {
+          "n1": true
+        }
+      }
+    }
+  ],
+  "verdict": "PASS",
+  "events": [
+    {
+      "t": 0.0043,
+      "event": "experiment_start",
+      "scenario": "pgaf-primary-loss",
+      "backend": "laptop-nsnode"
+    },
+    {
+      "t": 0.0147,
+      "event": "bench_ready",
+      "bridge": "pic-br0",
+      "bench_addr": "10.3.14.1"
+    },
+    {
+      "t": 0.0537,
+      "event": "bench_node_powered_on",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "boot": 1
+    },
+    {
+      "t": 0.1153,
+      "event": "bench_node_powered_on",
+      "node": "n2",
+      "addr": "10.3.14.12",
+      "boot": 1
+    },
+    {
+      "t": 0.219,
+      "event": "bench_node_powered_on",
+      "node": "n3",
+      "addr": "10.3.14.13",
+      "boot": 1
+    },
+    {
+      "t": 0.2288,
+      "event": "node_registered",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 0.3101,
+      "event": "bench_node_powered_on",
+      "node": "n4",
+      "addr": "10.3.14.14",
+      "boot": 1
+    },
+    {
+      "t": 0.3358,
+      "event": "node_registered",
+      "node": "n2",
+      "addr": "10.3.14.12",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 0.3822,
+      "event": "node_registered",
+      "node": "n3",
+      "addr": "10.3.14.13",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 0.4107,
+      "event": "node_registered",
+      "node": "n4",
+      "addr": "10.3.14.14",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 1.0249,
+      "event": "artifact_fetched",
+      "node": "n4",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "cached": false
+    },
+    {
+      "t": 1.92,
+      "event": "service_deployed",
+      "node": "n4",
+      "service": "monitor",
+      "role": "monitor",
+      "reused_state": false
+    },
+    {
+      "t": 2.2476,
+      "event": "service_started",
+      "node": "n4",
+      "service": "monitor",
+      "role": "monitor",
+      "port": 5432
+    },
+    {
+      "t": 2.2477,
+      "event": "service_running",
+      "node": "n4",
+      "service": "monitor",
+      "role": "monitor"
+    },
+    {
+      "t": 2.2477,
+      "event": "service_ready",
+      "service": "monitor",
+      "roles": {
+        "n4": "monitor"
+      }
+    },
+    {
+      "t": 2.7945,
+      "event": "artifact_fetched",
+      "node": "n1",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "cached": false
+    },
+    {
+      "t": 3.7115,
+      "event": "service_deployed",
+      "node": "n1",
+      "service": "db",
+      "role": "primary",
+      "reused_state": false
+    },
+    {
+      "t": 4.0381,
+      "event": "service_started",
+      "node": "n1",
+      "service": "db",
+      "role": "primary",
+      "port": 5432
+    },
+    {
+      "t": 4.0882,
+      "event": "service_running",
+      "node": "n1",
+      "service": "db",
+      "role": "primary"
+    },
+    {
+      "t": 4.8383,
+      "event": "artifact_fetched",
+      "node": "n2",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "cached": false
+    },
+    {
+      "t": 6.5688,
+      "event": "service_deployed",
+      "node": "n2",
+      "service": "db",
+      "role": "replica",
+      "reused_state": false
+    },
+    {
+      "t": 6.9012,
+      "event": "service_started",
+      "node": "n2",
+      "service": "db",
+      "role": "replica",
+      "port": 5432
+    },
+    {
+      "t": 6.9012,
+      "event": "service_running",
+      "node": "n2",
+      "service": "db",
+      "role": "replica"
+    },
+    {
+      "t": 7.789,
+      "event": "artifact_fetched",
+      "node": "n3",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "cached": false
+    },
+    {
+      "t": 9.2376,
+      "event": "service_deployed",
+      "node": "n3",
+      "service": "db",
+      "role": "replica",
+      "reused_state": false
+    },
+    {
+      "t": 9.6343,
+      "event": "service_started",
+      "node": "n3",
+      "service": "db",
+      "role": "replica",
+      "port": 5432
+    },
+    {
+      "t": 9.6844,
+      "event": "service_running",
+      "node": "n3",
+      "service": "db",
+      "role": "replica"
+    },
+    {
+      "t": 9.6845,
+      "event": "service_ready",
+      "service": "db",
+      "roles": {
+        "n1": "primary",
+        "n2": "replica",
+        "n3": "replica"
+      }
+    },
+    {
+      "t": 9.6845,
+      "event": "services_ready",
+      "bootstrap_roles": {
+        "n4": "monitor",
+        "n1": "primary",
+        "n2": "replica",
+        "n3": "replica"
+      }
+    },
+    {
+      "t": 9.7148,
+      "event": "workload_started"
+    },
+    {
+      "t": 29.8371,
+      "event": "service_probed",
+      "node": "n1",
+      "phase": "before_fault_1"
+    },
+    {
+      "t": 29.998,
+      "event": "service_probed",
+      "node": "n2",
+      "phase": "before_fault_1"
+    },
+    {
+      "t": 30.1107,
+      "event": "service_probed",
+      "node": "n3",
+      "phase": "before_fault_1"
+    },
+    {
+      "t": 30.1261,
+      "event": "service_probed",
+      "node": "n4",
+      "phase": "before_fault_1"
+    },
+    {
+      "t": 30.1261,
+      "event": "fault_resolved",
+      "action": "node.off",
+      "selector": {
+        "role": "primary"
+      },
+      "node": "n1"
+    },
+    {
+      "t": 30.1314,
+      "event": "bench_primitive",
+      "prim": "port.down",
+      "node": "n1"
+    },
+    {
+      "t": 30.1315,
+      "event": "bench_primitive",
+      "prim": "power.cut",
+      "node": "n1"
+    },
+    {
+      "t": 30.145,
+      "event": "bench_power_cut_settled",
+      "node": "n1",
+      "settled": true
+    },
+    {
+      "t": 30.145,
+      "event": "fault_injected",
+      "action": "node.off",
+      "node": "n1",
+      "details": {
+        "primitives": [
+          "port.down",
+          "power.cut"
+        ],
+        "settled": true,
+        "expected_up": false
+      }
+    },
+    {
+      "t": 31.0953,
+      "event": "node_unavailable",
+      "node": "n1",
+      "observed_by": "heartbeat_timeout"
+    },
+    {
+      "t": 31.5581,
+      "event": "workload_stalled",
+      "reason": "timeout"
+    },
+    {
+      "t": 40.1453,
+      "event": "service_probed",
+      "node": "n1",
+      "phase": "after_fault_1"
+    },
+    {
+      "t": 40.1861,
+      "event": "service_probed",
+      "node": "n2",
+      "phase": "after_fault_1"
+    },
+    {
+      "t": 40.2301,
+      "event": "service_probed",
+      "node": "n3",
+      "phase": "after_fault_1"
+    },
+    {
+      "t": 40.2391,
+      "event": "service_probed",
+      "node": "n4",
+      "phase": "after_fault_1"
+    },
+    {
+      "t": 56.3982,
+      "event": "workload_resynced",
+      "client_acked": 20662,
+      "server_max": 20663
+    },
+    {
+      "t": 79.7696,
+      "event": "service_probed",
+      "node": "n2",
+      "phase": "before_fault_2"
+    },
+    {
+      "t": 79.7849,
+      "event": "service_probed",
+      "node": "n3",
+      "phase": "before_fault_2"
+    },
+    {
+      "t": 79.8037,
+      "event": "service_probed",
+      "node": "n4",
+      "phase": "before_fault_2"
+    },
+    {
+      "t": 79.8038,
+      "event": "fault_resolved",
+      "action": "node.on",
+      "selector": {
+        "node_of": 1
+      },
+      "node": "n1"
+    },
+    {
+      "t": 79.8061,
+      "event": "bench_node_powered_on",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "boot": 2
+    },
+    {
+      "t": 79.8108,
+      "event": "bench_primitive",
+      "prim": "port.up",
+      "node": "n1"
+    },
+    {
+      "t": 79.8109,
+      "event": "fault_injected",
+      "action": "node.on",
+      "node": "n1",
+      "details": {
+        "primitives": [
+          "power.on",
+          "port.up"
+        ],
+        "expected_up": true,
+        "service_lost": true,
+        "boot": 2,
+        "disk": "/var/tmp/picluster/nodes/n1/disk"
+      }
+    },
+    {
+      "t": 79.9205,
+      "event": "service_probed",
+      "node": "n2",
+      "phase": "after_fault_2"
+    },
+    {
+      "t": 79.952,
+      "event": "service_probed",
+      "node": "n3",
+      "phase": "after_fault_2"
+    },
+    {
+      "t": 79.9626,
+      "event": "service_probed",
+      "node": "n4",
+      "phase": "after_fault_2"
+    },
+    {
+      "t": 80.2947,
+      "event": "node_registered",
+      "node": "n1",
+      "addr": "10.3.14.11",
+      "hw": {
+        "cpu": {
+          "online": 1
+        },
+        "memory_kb": 4091944,
+        "source": "proc_only"
+      }
+    },
+    {
+      "t": 80.5157,
+      "event": "node_returned",
+      "node": "n1",
+      "service": "db",
+      "restoring": "member"
+    },
+    {
+      "t": 80.5335,
+      "event": "artifact_fetched",
+      "node": "n1",
+      "sha256": "25d16ad36d605b22932dd16aa93a761ec925de9c67883ca4c1aac36d7e2f2387",
+      "cached": true
+    },
+    {
+      "t": 80.5393,
+      "event": "service_deployed",
+      "node": "n1",
+      "service": "db",
+      "role": "member",
+      "reused_state": true
+    },
+    {
+      "t": 80.9017,
+      "event": "workload_resumed"
+    },
+    {
+      "t": 81.8666,
+      "event": "service_started",
+      "node": "n1",
+      "service": "db",
+      "role": "member",
+      "port": 5432
+    },
+    {
+      "t": 81.9168,
+      "event": "service_running",
+      "node": "n1",
+      "service": "db",
+      "role": "replica"
+    },
+    {
+      "t": 159.7649,
+      "event": "service_probed",
+      "node": "n1",
+      "phase": "end"
+    },
+    {
+      "t": 159.8435,
+      "event": "service_probed",
+      "node": "n2",
+      "phase": "end"
+    },
+    {
+      "t": 159.8947,
+      "event": "service_probed",
+      "node": "n3",
+      "phase": "end"
+    },
+    {
+      "t": 159.9056,
+      "event": "service_probed",
+      "node": "n4",
+      "phase": "end"
+    },
+    {
+      "t": 159.9057,
+      "event": "workload_stopped",
+      "ok": 90869,
+      "per_second": [
+        967,
+        1016,
+        781,
+        939,
+        1161,
+        1135,
+        983,
+        877,
+        901,
+        990,
+        1055,
+        1059,
+        1025,
+        1102,
+        1148,
+        1100,
+        1118,
+        1127,
+        1059,
+        995,
+        124,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        460,
+        879,
+        333,
+        746,
+        734,
+        901,
+        957,
+        1066,
+        881,
+        881,
+        872,
+        930,
+        968,
+        892,
+        926,
+        959,
+        869,
+        947,
+        905,
+        903,
+        922,
+        897,
+        818,
+        884,
+        895,
+        888,
+        856,
+        866,
+        921,
+        898,
+        899,
+        885,
+        856,
+        858,
+        941,
+        972,
+        898,
+        921,
+        964,
+        836,
+        881,
+        920,
+        929,
+        883,
+        920,
+        895,
+        946,
+        849,
+        849,
+        894,
+        921,
+        922,
+        904,
+        864,
+        824,
+        899,
+        945,
+        900,
+        918,
+        898,
+        910,
+        908,
+        935,
+        973,
+        934,
+        873,
+        929,
+        944,
+        847,
+        923,
+        907,
+        903,
+        880,
+        872,
+        917,
+        932,
+        985,
+        884,
+        906
+      ]
+    },
+    {
+      "t": 159.9065,
+      "event": "check_evaluated",
+      "name": "never_two_writable",
+      "result": "PASS"
+    },
+    {
+      "t": 159.9067,
+      "event": "check_evaluated",
+      "name": "failover_promoted_survivor",
+      "result": "PASS"
+    },
+    {
+      "t": 159.9069,
+      "event": "check_evaluated",
+      "name": "old_primary_returns_as_replica",
+      "result": "PASS"
+    },
+    {
+      "t": 159.907,
+      "event": "check_evaluated",
+      "name": "exactly_one_primary",
+      "result": "PASS"
+    },
+    {
+      "t": 159.9071,
+      "event": "check_evaluated",
+      "name": "acked_prefix_present",
+      "result": "PASS"
+    },
+    {
+      "t": 159.9071,
+      "event": "verdict",
+      "verdict": "PASS"
+    },
+    {
+      "t": 160.433,
+      "event": "teardown_done"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+name: no_dev_shm_leak
+requires: [private_dev_shm]
+observes: [private_dev_shm]
+impl: checks.no_leak:dev_shm

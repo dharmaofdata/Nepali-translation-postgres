@@ -1,0 +1,4 @@
+name: paused_node_is_not_dead
+requires: [peers_see_no_progress, processes_gone]
+observes: [peers_see_no_progress, processes_gone]
+impl: checks.paused_node_is_not_dead:evaluate

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Check prerequisites, publish artifacts, run tests.  Installs nothing.
+set -e
+cd "$(dirname "$(readlink -f "$0")")"
+fail() { echo "bootstrap-dev: $*" >&2; exit 1; }
+
+[ "$(uname -s)" = Linux ] || fail "Linux required"
+python3 -c 'import sys; sys.exit(sys.version_info < (3, 10))' || fail "python3 >= 3.10 required"
+python3 -c 'import yaml' 2>/dev/null || fail "PyYAML missing (apt install python3-yaml)"
+command -v ip >/dev/null || fail "iproute2 missing (apt install iproute2)"
+awk '$3=="cgroup2"{f=1} END{exit !f}' /proc/mounts || fail "cgroup2 not mounted"
+python3 -c 'import os,sys; v=tuple(map(int,os.uname().release.split(".")[:2])); sys.exit(v < (5,14))' \
+    || fail "kernel >= 5.14 required (cgroup.kill)"
+
+python3 tools/publish_artifacts.py
+PYTHONPATH=. python3 -m unittest discover -s tests -t .
+
+reason=$(PYTHONPATH=. python3 -c 'from controller.backends.laptop_nsnode import probe; print(probe() or "")')
+if [ -n "$reason" ]; then
+    echo "note: laptop-nsnode unavailable here, netns tests skipped and 'run' will refuse: $reason"
+fi
+echo "ok: export PATH=\"$PWD:\$PATH\""

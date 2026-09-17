@@ -1,0 +1,27 @@
+name: laptop-nsnode
+status: implemented
+kernel: shared
+# Only semantics proven by this implementation and its tests.
+provides:
+  - isolated_network_identity   # netns + fixed IP + port 5432 everywhere (tests/test_netns.py)
+  - processes_gone              # cgroup v2 cgroup.kill of the node cgroup
+  - peers_see_silence           # host-side veth down before kill (tests/test_netns.py)
+  - artifact_delivery_path      # agent fetches over HTTP from controller, verifies sha256
+  - disk_preserved              # <node_root>/<node>/disk outlives node.off (tests/test_netns.py)
+  - private_ipc_namespace       # unshare --ipc per boot
+  - private_dev_shm             # tmpfs in the node's own mount namespace
+  - peers_see_no_progress       # cgroup.freeze: processes stop, the kernel answers
+planned_provides:
+  - unfsynced_loss              # LazyFS
+actions:
+  node.off: {target_state: available}
+  node.on: {target_state: unavailable}
+  process.pause: {target_state: available}
+  # A paused node stops sending heartbeats, so by the time it is resumed the
+  # controller may already have written it off as unavailable.
+  process.resume: {target_state: any}
+implementation: controller.backends.laptop_nsnode:LaptopNsnode
+hw_overlay: configs/hw/laptop-nsnode.yaml
+constraints:
+  requires_root: true
+  requires: [cgroup2 with cgroup.kill, iproute2, util-linux unshare]
