@@ -1,5 +1,0 @@
-name: postgres-16
-type: tree
-service_types: [postgres]
-build: tools/build_postgres.sh
-entrypoint: pg/bin            # bindir inside the unpacked tree

@@ -1,4 +1,0 @@
-name: no_ipc_leak
-requires: [private_ipc_namespace]
-observes: [private_ipc_namespace]
-impl: checks.no_leak:ipc

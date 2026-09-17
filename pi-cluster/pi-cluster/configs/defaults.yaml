@@ -1,2 +1,0 @@
-# Local run defaults.  Data, so that controller code carries no backend names.
-default_backend: laptop-nsnode

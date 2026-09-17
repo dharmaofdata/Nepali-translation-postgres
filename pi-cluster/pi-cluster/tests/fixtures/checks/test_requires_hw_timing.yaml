@@ -1,4 +1,0 @@
-# Test-only check: requires a semantics no laptop backend provides.
-name: test_requires_hw_timing
-requires: [hw_timing]
-impl: tests.fixtures.checks_impl:must_not_run

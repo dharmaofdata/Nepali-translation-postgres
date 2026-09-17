@@ -1,2 +1,0 @@
-name: exactly_one_primary
-impl: checks.exactly_one_primary:evaluate

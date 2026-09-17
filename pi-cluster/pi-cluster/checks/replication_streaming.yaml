@@ -1,3 +1,0 @@
-name: replication_streaming
-requires: [isolated_network_identity]
-impl: checks.replication_streaming:evaluate

@@ -1,4 +1,0 @@
-__pycache__/
-artifacts/repo/
-experiments/*
-!experiments/.gitkeep

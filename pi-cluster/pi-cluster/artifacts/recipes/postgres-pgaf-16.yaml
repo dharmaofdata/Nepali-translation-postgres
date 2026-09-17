@@ -1,5 +1,0 @@
-name: postgres-pgaf-16
-type: tree
-service_types: [pgaf, pgaf-postgres]
-build: tools/build_postgres_pgaf.sh
-entrypoint: .                  # the tree root: pg/bin and pgaf/bin live in it

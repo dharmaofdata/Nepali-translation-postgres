@@ -1,4 +1,0 @@
-name: target_processes_gone
-requires: [processes_gone]
-observes: [processes_gone]
-impl: checks.target_processes_gone:evaluate

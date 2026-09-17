@@ -1,5 +1,0 @@
-name: fake-service
-type: script
-service_types: [fake]
-source: fake/fake_service.py
-entrypoint: fake_service.py

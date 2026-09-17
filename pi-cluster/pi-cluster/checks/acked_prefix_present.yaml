@@ -1,4 +1,0 @@
-name: acked_prefix_present
-requires: [disk_preserved, processes_gone]
-observes: [processes_gone]
-impl: checks.acked_prefix_present:evaluate
